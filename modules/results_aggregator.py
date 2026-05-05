@@ -1,12 +1,21 @@
 """
 Module 4 — Final Results Aggregator
-=====================================
+=================================================================
 Combines outputs from all three modules into a single
 summary report with the key paper-ready figures.
 
-Outputs:
-  plots/final_summary.png   — the main result figure
-  results/final_summary.csv — all numbers in one table
+Inputs
+------
+results/hmm_metrics.csv      — produced by Module 1
+results/hmm_beliefs.csv      — produced by Module 1
+results/csp_metrics.csv      — produced by Module 2
+results/ppo_evaluation.csv   — produced by Module 3
+results/ppo_training_curves.csv — produced by Module 3
+
+Outputs
+-------
+plots/final_summary.png      — main 2x2 result figure
+results/final_summary.csv    — all numbers in one table
 """
 
 import numpy as np
@@ -23,26 +32,32 @@ REGIME_COLORS = ["#4C9BE8", "#E84C4C", "#F5A623", "#8BC34A"]
 
 def run(results_dir="results", plots_dir="plots"):
     os.makedirs(results_dir, exist_ok=True)
-    os.makedirs(plots_dir, exist_ok=True)
+    os.makedirs(plots_dir,   exist_ok=True)
 
     print("\n=== MODULE 4: FINAL RESULTS AGGREGATOR ===")
 
     # Load all results
-    hmm_metrics  = pd.read_csv(f"{results_dir}/hmm_metrics.csv")
-    csp_metrics  = pd.read_csv(f"{results_dir}/csp_metrics.csv")
-    ppo_eval     = pd.read_csv(f"{results_dir}/ppo_evaluation.csv")
-    hmm_beliefs  = pd.read_csv(f"{results_dir}/hmm_beliefs.csv")
+    hmm_metrics = pd.read_csv(f"{results_dir}/hmm_metrics.csv")
+    csp_metrics = pd.read_csv(f"{results_dir}/csp_metrics.csv")
+    ppo_eval    = pd.read_csv(f"{results_dir}/ppo_evaluation.csv")
+    hmm_beliefs = pd.read_csv(f"{results_dir}/hmm_beliefs.csv")
 
-    # ── Figure: 2×2 summary ─────────────────────────────────────────────────
+    # Ensure regime column is int for safe comparisons
+    csp_metrics['regime'] = csp_metrics['regime'].astype(int)
+
+    # ── Figure: 2×2 summary ──────────────────────────────────────────────────
     fig = plt.figure(figsize=(15, 11))
     gs  = gridspec.GridSpec(2, 2, hspace=0.42, wspace=0.35)
 
-    # ── Panel A: HMM regime belief (one day, 6am–11pm) ─────────────────────
+    # ── Panel A: HMM regime belief (one day, 6am–11pm) ──────────────────────
     ax_a = fig.add_subplot(gs[0, 0])
     day_data = hmm_beliefs[hmm_beliefs["day"] == hmm_beliefs["day"].max()].copy()
-    day_data = day_data[(day_data["minute"] >= 360) & (day_data["minute"] <= 1380)]
-    hours = day_data["minute"] / 60
-    cols  = ["p_quiet","p_lunch","p_afternoon","p_dinner"]
+    day_data = day_data[
+        (day_data["minute"] >= 360) &
+        (day_data["minute"] <= 1380)
+    ]
+    hours  = day_data["minute"] / 60
+    cols   = ["p_quiet", "p_lunch", "p_afternoon", "p_dinner"]
     bottom = np.zeros(len(day_data))
     for k, (col, name, color) in enumerate(zip(cols, REGIME_NAMES, REGIME_COLORS)):
         vals = day_data[col].values
@@ -59,20 +74,24 @@ def run(results_dir="results", plots_dir="plots"):
               transform=ax_a.transAxes, ha="right", fontsize=9,
               bbox=dict(boxstyle="round", facecolor="white", alpha=0.7))
 
-    # ── Panel B: A* vs Greedy on-time rate per regime ───────────────────────
+    # ── Panel B: A* regime vs Greedy on-time rate per regime ─────────────────
     ax_b = fig.add_subplot(gs[0, 1])
-    csp_astar  = csp_metrics[csp_metrics["method"] == "astar"]
+    csp_astar  = csp_metrics[csp_metrics["method"] == "astar_regime"]
     csp_greedy = csp_metrics[csp_metrics["method"] == "greedy"]
     x = np.arange(len(REGIME_NAMES))
     w = 0.35
-    bars1 = ax_b.bar(x - w/2,
-                     [csp_greedy[csp_greedy["regime"]==r]["on_time_rate"].values[0]
-                      if r in csp_greedy["regime"].values else 0 for r in range(4)],
-                     w, label="Greedy", color="#95A5A6", alpha=0.85)
-    bars2 = ax_b.bar(x + w/2,
-                     [csp_astar[csp_astar["regime"]==r]["on_time_rate"].values[0]
-                      if r in csp_astar["regime"].values else 0 for r in range(4)],
-                     w, label="A* + Regime Weights", color="#E84C4C", alpha=0.85)
+    bars1 = ax_b.bar(
+        x - w/2,
+        [csp_greedy[csp_greedy["regime"] == r]["on_time_rate"].values[0]
+         if r in csp_greedy["regime"].values else 0 for r in range(4)],
+        w, label="Greedy", color="#95A5A6", alpha=0.85
+    )
+    bars2 = ax_b.bar(
+        x + w/2,
+        [csp_astar[csp_astar["regime"] == r]["on_time_rate"].values[0]
+         if r in csp_astar["regime"].values else 0 for r in range(4)],
+        w, label="A* + Regime Weights", color="#E84C4C", alpha=0.85
+    )
     ax_b.set_xticks(x)
     ax_b.set_xticklabels(REGIME_NAMES, rotation=15, fontsize=8)
     ax_b.set_ylabel("On-Time Rate")
@@ -85,14 +104,14 @@ def run(results_dir="results", plots_dir="plots"):
             ax_b.text(b.get_x() + b.get_width()/2, h + 0.01,
                       f"{h:.2f}", ha="center", va="bottom", fontsize=7)
 
-    # ── Panel C: PPO training curves ─────────────────────────────────────────
+    # ── Panel C: PPO training curves ──────────────────────────────────────────
     ax_c = fig.add_subplot(gs[1, 0])
     try:
         curves = pd.read_csv(f"{results_dir}/ppo_training_curves.csv")
         def smooth(s, w=15):
             return s.rolling(w, min_periods=1).mean()
         if "reward_with_regime" in curves.columns:
-            with_r = curves["reward_with_regime"].dropna()
+            with_r    = curves["reward_with_regime"].dropna()
             without_r = curves["reward_without_regime"].dropna()
             ax_c.plot(smooth(with_r),    color="#E84C4C", lw=1.5,
                       label="PPO + Regime Belief")
@@ -107,14 +126,20 @@ def run(results_dir="results", plots_dir="plots"):
     ax_c.legend(fontsize=8)
     ax_c.grid(alpha=0.25)
 
-    # ── Panel D: Three-way final comparison ──────────────────────────────────
+    # ── Panel D: Three-way final comparison ───────────────────────────────────
     ax_d = fig.add_subplot(gs[1, 1])
     ppo_summary = ppo_eval.groupby("use_regime")["on_time_rate"].mean()
     labels, vals, bar_colors = [], [], []
-    label_map = {"greedy":"Greedy\n(baseline)",
-                 "False":"PPO\n(no regime)",
-                 "True":"PPO + Regime\nBelief (ours)"}
-    color_map  = {"greedy":"#95A5A6", "False":"#4C9BE8", "True":"#E84C4C"}
+    label_map = {
+        "greedy": "Greedy\n(baseline)",
+        "False":  "PPO\n(no regime)",
+        "True":   "PPO + Regime\nBelief (ours)"
+    }
+    color_map = {
+        "greedy": "#95A5A6",
+        "False":  "#4C9BE8",
+        "True":   "#E84C4C"
+    }
     for k, v in ppo_summary.items():
         labels.append(label_map.get(str(k), str(k)))
         vals.append(v)
@@ -127,38 +152,50 @@ def run(results_dir="results", plots_dir="plots"):
                   fontsize=10, fontweight="bold")
     ax_d.set_ylim(0, 1.15)
     ax_d.set_ylabel("Mean On-Time Rate")
-    ax_d.set_title("D — Final Three-Way Comparison\nMean On-Time Rate (test day)")
+    ax_d.set_title("D — Final Three-Way Comparison\nMean On-Time Rate (test days)")
 
     # Novelty annotation
     if len(vals) >= 2:
-        best  = max(vals)
-        second= sorted(vals)[-2] if len(vals) > 1 else best
-        delta = best - second
-        ax_d.annotate(f"+{delta:.1%}\nvs best baseline",
-                      xy=(labels[vals.index(best)], best),
-                      xytext=(0.72, 0.6), textcoords="axes fraction",
-                      arrowprops=dict(arrowstyle="->", color="black"),
-                      fontsize=9, color="darkred", fontweight="bold")
+        best   = max(vals)
+        second = sorted(vals)[-2] if len(vals) > 1 else best
+        delta  = best - second
+        ax_d.annotate(
+            f"+{delta:.1%}\nvs best baseline",
+            xy=(labels[vals.index(best)], best),
+            xytext=(0.72, 0.6), textcoords="axes fraction",
+            arrowprops=dict(arrowstyle="->", color="black"),
+            fontsize=9, color="darkred", fontweight="bold"
+        )
 
     plt.suptitle(
         "Regime-Aware Courier Dispatching via HMM + Constrained A* + PPO\n"
         "Novel: HMM regime belief fed directly into RL state space",
-        fontsize=12, y=1.01, fontweight="bold")
-
+        fontsize=12, y=1.01, fontweight="bold"
+    )
     plt.savefig(f"{plots_dir}/final_summary.png", dpi=130, bbox_inches="tight")
     plt.close()
     print(f"  Saved: {plots_dir}/final_summary.png")
 
     # ── Save consolidated CSV ─────────────────────────────────────────────────
     rows = []
-    rows.append(dict(module="HMM", metric="regime_accuracy",
-                     value=round(float(hmm_metrics["accuracy"].values[0]), 4)))
-    if "mean_detection_lag" in hmm_metrics.columns:
-        lag = hmm_metrics["mean_detection_lag"].values[0]
-        if pd.notna(lag):
-            rows.append(dict(module="HMM", metric="mean_detection_lag_min",
-                             value=round(float(lag), 2)))
 
+    # HMM metrics
+    rows.append(dict(
+        module="HMM", metric="regime_accuracy",
+        value=round(float(hmm_metrics["accuracy"].values[0]), 4)
+    ))
+    if "mean_confidence_correct" in hmm_metrics.columns:
+        rows.append(dict(
+            module="HMM", metric="mean_confidence_correct",
+            value=round(float(hmm_metrics["mean_confidence_correct"].values[0]), 4)
+        ))
+    if "mean_confidence_wrong" in hmm_metrics.columns:
+        rows.append(dict(
+            module="HMM", metric="mean_confidence_wrong",
+            value=round(float(hmm_metrics["mean_confidence_wrong"].values[0]), 4)
+        ))
+
+    # CSP metrics
     for _, row in csp_metrics.iterrows():
         rows.append(dict(
             module=f"CSP_{row['method']}",
@@ -166,9 +203,13 @@ def run(results_dir="results", plots_dir="plots"):
             value=round(float(row["on_time_rate"]), 4)
         ))
 
+    # PPO metrics
     for k, v in ppo_summary.items():
-        rows.append(dict(module="PPO", metric=f"on_time_rate_{k}",
-                         value=round(float(v), 4)))
+        rows.append(dict(
+            module="PPO",
+            metric=f"on_time_rate_{k}",
+            value=round(float(v), 4)
+        ))
 
     final_df = pd.DataFrame(rows)
     final_df.to_csv(f"{results_dir}/final_summary.csv", index=False)
@@ -180,7 +221,7 @@ def run(results_dir="results", plots_dir="plots"):
 
 
 if __name__ == "__main__":
-    import sys, os
+    import sys
     sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
     os.chdir(os.path.dirname(os.path.dirname(__file__)))
     run()
