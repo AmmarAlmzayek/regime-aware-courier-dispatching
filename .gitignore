@@ -1,0 +1,20 @@
+# Raw dataset files — too large for git
+data/all_waybill_info_meituan_0322.csv
+data/courier_wave_info_meituan.csv
+
+# Generated data files
+data/orders.csv
+data/couriers.csv
+data/observations.csv
+data/regime_truth.csv
+
+# Results and plots
+results/
+plots/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+.DS_Store
