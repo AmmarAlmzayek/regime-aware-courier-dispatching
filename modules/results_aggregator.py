@@ -6,8 +6,8 @@ summary report with the key paper-ready figures.
 
 Inputs
 ------
-results/hmm_metrics.csv      — produced by Module 1
-results/hmm_beliefs.csv      — produced by Module 1
+results/bayesian_metrics.csv — produced by Module 1
+results/bayesian_beliefs.csv — produced by Module 1
 results/csp_metrics.csv      — produced by Module 2
 results/ppo_evaluation.csv   — produced by Module 3
 results/ppo_training_curves.csv — produced by Module 3
@@ -37,10 +37,10 @@ def run(results_dir="results", plots_dir="plots"):
     print("\n=== MODULE 4: FINAL RESULTS AGGREGATOR ===")
 
     # Load all results
-    hmm_metrics = pd.read_csv(f"{results_dir}/hmm_metrics.csv")
+    bayesian_metrics = pd.read_csv(f"{results_dir}/bayesian_metrics.csv")
     csp_metrics = pd.read_csv(f"{results_dir}/csp_metrics.csv")
     ppo_eval    = pd.read_csv(f"{results_dir}/ppo_evaluation.csv")
-    hmm_beliefs = pd.read_csv(f"{results_dir}/hmm_beliefs.csv")
+    bayesian_beliefs = pd.read_csv(f"{results_dir}/bayesian_beliefs.csv")
 
     # Ensure regime column is int for safe comparisons
     csp_metrics['regime'] = csp_metrics['regime'].astype(int)
@@ -49,9 +49,9 @@ def run(results_dir="results", plots_dir="plots"):
     fig = plt.figure(figsize=(15, 11))
     gs  = gridspec.GridSpec(2, 2, hspace=0.42, wspace=0.35)
 
-    # ── Panel A: HMM regime belief (one day, 6am–11pm) ──────────────────────
+    # ── Panel A: Bayesian regime belief (one day, 6am–11pm) ──────────────────────
     ax_a = fig.add_subplot(gs[0, 0])
-    day_data = hmm_beliefs[hmm_beliefs["day"] == hmm_beliefs["day"].max()].copy()
+    day_data = bayesian_beliefs[bayesian_beliefs["day"] == bayesian_beliefs["day"].max()].copy()
     day_data = day_data[
         (day_data["minute"] >= 360) &
         (day_data["minute"] <= 1380)
@@ -67,9 +67,9 @@ def run(results_dir="results", plots_dir="plots"):
     ax_a.set_ylim(0, 1)
     ax_a.set_xlabel("Hour of day")
     ax_a.set_ylabel("P(regime | observations)")
-    ax_a.set_title("A — HMM Online Regime Beliefs\n(Bayesian forward algorithm)")
+    ax_a.set_title("A — Bayesian Online Regime Beliefs\n(Bayesian forward algorithm)")
     ax_a.legend(fontsize=7, loc="upper left", ncol=2)
-    acc = hmm_metrics["accuracy"].values[0]
+    acc = bayesian_metrics["accuracy"].values[0]
     ax_a.text(0.98, 0.04, f"Accuracy: {acc:.1%}",
               transform=ax_a.transAxes, ha="right", fontsize=9,
               bbox=dict(boxstyle="round", facecolor="white", alpha=0.7))
@@ -168,8 +168,8 @@ def run(results_dir="results", plots_dir="plots"):
         )
 
     plt.suptitle(
-        "Regime-Aware Courier Dispatching via HMM + Constrained A* + PPO\n"
-        "Novel: HMM regime belief fed directly into RL state space",
+        "Regime-Aware Courier Dispatching via Bayesian Filter + Constrained A* + PPO\n"
+        "Novel: Bayesian regime belief fed directly into RL state space",
         fontsize=12, y=1.01, fontweight="bold"
     )
     plt.savefig(f"{plots_dir}/final_summary.png", dpi=130, bbox_inches="tight")
@@ -179,20 +179,20 @@ def run(results_dir="results", plots_dir="plots"):
     # ── Save consolidated CSV ─────────────────────────────────────────────────
     rows = []
 
-    # HMM metrics
+    # Bayesian metrics
     rows.append(dict(
-        module="HMM", metric="regime_accuracy",
-        value=round(float(hmm_metrics["accuracy"].values[0]), 4)
+        module="Bayesian", metric="regime_accuracy",
+        value=round(float(bayesian_metrics["accuracy"].values[0]), 4)
     ))
-    if "mean_confidence_correct" in hmm_metrics.columns:
+    if "mean_confidence_correct" in bayesian_metrics.columns:
         rows.append(dict(
-            module="HMM", metric="mean_confidence_correct",
-            value=round(float(hmm_metrics["mean_confidence_correct"].values[0]), 4)
+            module="Bayesian", metric="mean_confidence_correct",
+            value=round(float(bayesian_metrics["mean_confidence_correct"].values[0]), 4)
         ))
-    if "mean_confidence_wrong" in hmm_metrics.columns:
+    if "mean_confidence_wrong" in bayesian_metrics.columns:
         rows.append(dict(
-            module="HMM", metric="mean_confidence_wrong",
-            value=round(float(hmm_metrics["mean_confidence_wrong"].values[0]), 4)
+            module="Bayesian", metric="mean_confidence_wrong",
+            value=round(float(bayesian_metrics["mean_confidence_wrong"].values[0]), 4)
         ))
 
     # CSP metrics

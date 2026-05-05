@@ -6,7 +6,7 @@ on real Meituan INFORMS TSL data. For each dispatch cycle (every 2 minutes
 of a simulated test day), the system gathers the pending orders and the
 on-shift couriers and finds the minimum-cost feasible assignment via A*
 search. The cost function is a probability-weighted expectation over the
-HMM regime posterior produced by Module 1.
+Bayesian regime posterior produced by Module 1.
 
 AI Topics Covered
 -----------------
@@ -19,13 +19,13 @@ Three Conditions Compared
 -------------------------
 1. Greedy baseline             — nearest-merchant courier, no regime awareness
 2. A* with fixed weights       — A* search with regime-agnostic flat weights (ablation)
-3. A* with regime weights      — A* search with weights = E over HMM posterior (novel)
+3. A* with regime weights      — A* search with weights = E over Bayesian posterior (novel)
 
 Inputs
 ------
 data/processed/orders.csv         — produced by data/prepare_meituan.py
 data/processed/couriers.csv       — produced by data/prepare_meituan.py
-results/hmm_beliefs.csv           — produced by Module 1 (HMM Forward Filter)
+results/bayesian_beliefs.csv           — produced by Module 1 (Bayesian Inference)
 
 Outputs
 -------
@@ -382,7 +382,7 @@ def simulate_day(day, orders_df, couriers_df, beliefs_df, method, noise_seed=42)
     day_beliefs  = beliefs_df[beliefs_df['day'] == day].set_index('minute')
 
     # Precompute per-order noise (positive-only extra delivery minutes).
-    # Order's regime = HMM ground-truth at its arrival minute.
+    # Order's regime = Bayesian ground-truth at its arrival minute.
     rng = np.random.default_rng(noise_seed + day)
     order_noise = {}
     arrivals_per_regime = defaultdict(int)
@@ -621,7 +621,7 @@ def plot_performance(metrics_df, save_path):
 # ── Main entry point ─────────────────────────────────────────────────────────
 def run(orders_path="data/processed/orders.csv",
         couriers_path="data/processed/couriers.csv",
-        beliefs_path="results/hmm_beliefs.csv",
+        beliefs_path="results/bayesian_beliefs.csv",
         results_dir="results", plots_dir="plots"):
     os.makedirs(results_dir, exist_ok=True)
     os.makedirs(plots_dir,   exist_ok=True)
@@ -631,7 +631,7 @@ def run(orders_path="data/processed/orders.csv",
     couriers_df = pd.read_csv(couriers_path)
     beliefs_df  = pd.read_csv(beliefs_path)
 
-    test_days = test_days = [6, 7]
+    test_days = [6, 7]
     print(f"Test days: {test_days} | Orders: {len(orders_df):,} | "
           f"Courier records: {len(couriers_df)}")
     print(f"Belief rows: {len(beliefs_df):,}\n")

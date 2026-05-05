@@ -4,7 +4,7 @@ MAIN PIPELINE — Regime-Aware Courier Dispatching
 Runs all modules in sequence on real Meituan INFORMS TSL data.
 
   Step 0: Prepare real Meituan data    (data/prepare_meituan_data.py)
-  Step 1: HMM regime detection         (modules/hmm_regime_detector.py)
+  Step 1: Bayesian regime detection     (modules/bayesian_regime_detector.py)
   Step 2: CSP + A* assignment          (modules/csp_assignment.py)
   Step 3: PPO regime-conditioned RL    (modules/ppo_dispatcher.py)
   Step 4: Final results aggregation    (modules/results_aggregator.py)
@@ -44,12 +44,12 @@ def step0_prepare_data():
     mod.main()
 
 
-def step1_hmm():
+def step1_bayesian():
     print("\n" + "="*55)
-    print("  STEP 1: HMM Regime Detector (Person 1)")
+    print("  STEP 1: Bayesian Regime Detector (Person 1)")
     print("="*55)
     sys.path.insert(0, os.path.join(BASE, "modules"))
-    import hmm_regime_detector as m1
+    import bayesian_regime_detector as m1
     m1.run(obs_path   =os.path.join(PROCESSED_DIR, "observations.csv"),
            results_dir=RESULTS_DIR,
            plots_dir  =PLOTS_DIR)
@@ -62,7 +62,7 @@ def step2_csp():
     import csp_assignment as m2
     m2.run(orders_path  =os.path.join(PROCESSED_DIR, "orders.csv"),
            couriers_path=os.path.join(PROCESSED_DIR, "couriers.csv"),
-           beliefs_path =os.path.join(RESULTS_DIR, "hmm_beliefs.csv"),
+           beliefs_path=os.path.join(RESULTS_DIR, "bayesian_beliefs.csv"),
            results_dir  =RESULTS_DIR,
            plots_dir    =PLOTS_DIR)
 
@@ -75,7 +75,7 @@ def step3_ppo(fast=False):
     timesteps = 15_000 if fast else 40_000
     m3.run(orders_path    =os.path.join(PROCESSED_DIR, "orders.csv"),
            couriers_path  =os.path.join(PROCESSED_DIR, "couriers.csv"),
-           beliefs_path   =os.path.join(RESULTS_DIR, "hmm_beliefs.csv"),
+           beliefs_path   =os.path.join(RESULTS_DIR, "bayesian_beliefs.csv"),
            results_dir    =RESULTS_DIR,
            plots_dir      =PLOTS_DIR,
            total_timesteps=timesteps)
@@ -93,9 +93,9 @@ def print_banner():
     print("""
 ╔══════════════════════════════════════════════════════╗
 ║  REGIME-AWARE COURIER DISPATCHING                    ║
-║  HMM + Constrained A* + Regime-Conditioned PPO       ║
+║  Bayesian Filter + Constrained A* + PPO              ║
 ║                                                      ║
-║  Novel: HMM belief fed into RL state space           ║
+║  Novel: Bayesian belief fed into RL state space      ║
 ║  Dataset: Real Meituan INFORMS TSL (district 3)      ║
 ╚══════════════════════════════════════════════════════╝
     """)
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     if args.step == 0 or args.step == 0:
         step0_prepare_data()
     if args.step == 0 or args.step == 1:
-        step1_hmm()
+        step1_bayesian()
     if args.step == 0 or args.step == 2:
         step2_csp()
     if args.step == 0 or args.step == 3:

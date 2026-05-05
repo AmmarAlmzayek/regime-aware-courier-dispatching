@@ -1,5 +1,5 @@
 """
-Module 1 — HMM Regime Detector
+Module 1 — Bayesian Regime Detector
 =================================================================
 Uses a Bayesian forward filter with hand-tuned emission parameters
 fitted to real Meituan order patterns. For each minute of the test
@@ -8,8 +8,8 @@ hidden demand regimes and updates it as new observations arrive.
 
 AI Topics Covered
 -----------------
-- Hidden Markov Model (Probabilistic Reasoning over Time)
 - Bayesian belief update (forward algorithm)
+- Probabilistic Reasoning over Time
 - Probabilistic inference under uncertainty
 
 Inputs
@@ -18,9 +18,9 @@ data/processed/observations.csv  — produced by data/prepare_meituan_data.py
 
 Outputs
 -------
-results/hmm_beliefs.csv          — posterior P(regime | history) per timestep
-results/hmm_metrics.csv          — accuracy and confidence stats
-plots/regime_beliefs_day{N}.png  — belief plot for first test day
+results/bayesian_beliefs.csv          — posterior P(regime | history) per timestep
+results/bayesian_metrics.csv          — accuracy and confidence stats
+plots/bayesian_beliefs_day{N}.png  — belief plot for first test day
 """
 
 import pandas as pd
@@ -142,7 +142,7 @@ def plot_beliefs(beliefs, true_regimes, day, save_path):
                         alpha=0.8, color=REGIME_COLORS[k], label=REGIME_NAMES[k])
         bottom += beliefs[:, k]
     ax.set_ylabel("P(regime | history)")
-    ax.set_title(f"HMM Regime Beliefs — Day {day} (Bayesian Forward Filter)")
+    ax.set_title(f"Regime Beliefs — Day {day} (Bayesian Forward Filter)")
     ax.legend(loc="upper left", fontsize=8, ncol=4)
     ax.set_ylim(0, 1)
 
@@ -173,7 +173,7 @@ def run(obs_path="data/processed/observations.csv",
     os.makedirs(results_dir, exist_ok=True)
     os.makedirs(plots_dir,   exist_ok=True)
 
-    print("\n=== MODULE 1: HMM REGIME DETECTOR ===")
+    print("\n=== MODULE 1: BAYESIAN REGIME DETECTOR ===")
 
     if not os.path.exists(obs_path):
         raise FileNotFoundError(
@@ -220,7 +220,7 @@ def run(obs_path="data/processed/observations.csv",
         # Plot first test day
         if day == test_days[0]:
             plot_beliefs(beliefs, true, day,
-                         f"{plots_dir}/regime_beliefs_day{day}.png")
+                         f"{plots_dir}/bayesian_beliefs_day{day}.png")
 
     # Accuracy
     acc = np.mean(np.array(all_true) == np.array(all_pred))
@@ -243,16 +243,16 @@ def run(obs_path="data/processed/observations.csv",
     print(f"  When CORRECT: mean confidence = {rc.mean():.3f}")
 
     # Save outputs
-    beliefs_df.to_csv(f"{results_dir}/hmm_beliefs.csv", index=False)
-    print(f"\n  Saved: {results_dir}/hmm_beliefs.csv")
+    beliefs_df.to_csv(f"{results_dir}/bayesian_beliefs.csv", index=False)
+    print(f"\n  Saved: {results_dir}/bayesian_beliefs.csv")
 
     metrics = dict(
         accuracy=round(float(acc), 4),
         mean_confidence_correct=round(float(rc.mean()), 4),
         mean_confidence_wrong=round(float(wc.mean()), 4),
     )
-    pd.DataFrame([metrics]).to_csv(f"{results_dir}/hmm_metrics.csv", index=False)
-    print(f"  Saved: {results_dir}/hmm_metrics.csv")
+    pd.DataFrame([metrics]).to_csv(f"{results_dir}/bayesian_metrics.csv", index=False)
+    print(f"  Saved: {results_dir}/bayesian_metrics.csv")
 
     return beliefs_df
 

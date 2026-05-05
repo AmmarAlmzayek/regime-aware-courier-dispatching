@@ -2,17 +2,17 @@
 prepare_meituan_data.py
 =======================
 Converts raw Meituan dataset files into the exact format
-expected by the project modules (HMM, CSP, PPO).
+expected by the project modules (Bayesian, CSP, PPO).
 
 Input files (put these in your data/raw/ folder):
   all_waybill_info_meituan_0322.csv    <- main orders file (unzipped)
   courier_wave_info_meituan.csv        <- courier waves file
 
 Output files (saved to data/processed/ folder):
-  orders.csv        -> used by PPO dispatcher (your module)
-  couriers.csv      -> used by PPO dispatcher (your module)
-  observations.csv  -> used by HMM regime detector (Person 1)
-  regime_truth.csv  -> used for HMM evaluation
+  orders.csv        -> used by CSP and PPO dispatcher
+  couriers.csv      -> used by CSP and PPO dispatcher
+  observations.csv  -> used by Bayesian regime detector (Person 1)
+  regime_truth.csv  -> used for Bayesian detector evaluation
 
 Usage:
   python prepare_meituan_data.py
@@ -121,7 +121,7 @@ def build_orders():
     # Map date string to day number
     df['day'] = df['dt'].astype(int).map(DAY_MAP)
 
-    # Filter: on-demand only, accepted by courier, valid day
+    # Filter: district 3, on-demand only, accepted by courier, valid day
     sub = df[
         (df['day'].notna()) &
         (df['da_id'] == 3) &
@@ -352,7 +352,7 @@ def main():
         print("ERROR: The following files were not found:")
         for f in missing:
             print(f"  {f}")
-        print("\nMake sure your raw data files are in the data/ folder.")
+        print("\nMake sure your raw data files are in the data/raw/ folder.")
         return
 
     # Run all 3 steps

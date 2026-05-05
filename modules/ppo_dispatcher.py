@@ -2,7 +2,7 @@
 Module 3 — Regime-Conditioned PPO Dispatcher
 =================================================================
 Builds a Gymnasium-compatible dispatch environment and trains
-a PPO agent whose state includes the HMM regime belief vector.
+a PPO agent whose state includes the Bayesian regime belief vector.
 For each dispatch cycle, the agent assigns couriers to orders
 using a policy conditioned on the current demand regime.
 
@@ -28,7 +28,7 @@ Inputs
 ------
 data/processed/orders.csv        — produced by data/prepare_meituan_data.py
 data/processed/couriers.csv      — produced by data/prepare_meituan_data.py
-results/hmm_beliefs.csv          — produced by Module 1
+results/bayesian_beliefs.csv     — produced by Module 1
 
 Outputs
 -------
@@ -427,7 +427,7 @@ def plot_comparison(eval_df, save_path):
 # ── Main ──────────────────────────────────────────────────────────────────────
 def run(orders_path="data/processed/orders.csv",
         couriers_path="data/processed/couriers.csv",
-        beliefs_path="results/hmm_beliefs.csv",
+        beliefs_path="results/bayesian_beliefs.csv",
         results_dir="results", plots_dir="plots",
         total_timesteps=30_000):   # lower for speed; increase for better results
     os.makedirs(results_dir, exist_ok=True)

@@ -1,7 +1,7 @@
 # Regime-Aware Courier Dispatching
-### HMM + Constrained A* + Regime-Conditioned PPO
+### Bayesian Filter + Constrained A* + Regime-Conditioned PPO
 
-A food delivery dispatching system that infers hidden demand regimes (Quiet, Lunch Rush, Afternoon, Dinner Peak) from the live order stream using a Hidden Markov Model, and feeds that uncertainty signal directly into a PPO dispatcher and a CSP + A* assignment engine.
+A food delivery dispatching system that infers hidden demand regimes (Quiet, Lunch Rush, Afternoon, Dinner Peak) from the live order stream using a Bayesian forward filter, and feeds that uncertainty signal directly into a PPO dispatcher and a CSP + A* assignment engine.
 
 **Novel contribution:** Every existing dispatcher either ignores demand modes or uses raw time-of-day as a number. This system infers the hidden demand regime online via a Bayesian forward filter and feeds the full posterior distribution, not just a label, into the RL dispatcher's state space.
 
@@ -35,7 +35,7 @@ A food delivery dispatching system that infers hidden demand regimes (Quiet, Lun
 | PPO + Regime Belief | **89.7%** | 26/29 |
 
 ### Key findings
-- HMM regime detection accuracy: **47%** on real Meituan data (75% confidence when correct)
+- Bayesian regime detection accuracy: **47%** on real Meituan data (75% confidence when correct)
 - A* beats greedy by **7%** overall
 - Regime-aware A* expires **49 fewer orders** than greedy
 - Regime-aware A* wins on **3 out of 4 demand regimes**
@@ -60,7 +60,7 @@ regime-aware-courier-dispatching/
 │   └── prepare_meituan_data.py       ← Step 0: data preparation script
 │
 ├── modules/
-│   ├── hmm_regime_detector.py        ← Module 1: Bayesian forward filter
+│   ├── bayesian_regime_detector.py   ← Module 1: Bayesian forward filter
 │   ├── csp_assignment.py             ← Module 2: CSP + A* dispatcher
 │   ├── ppo_dispatcher.py             ← Module 3: PPO regime-conditioned agent
 │   └── results_aggregator.py         ← Module 4: final plots and summary
@@ -80,7 +80,7 @@ This project uses the **Meituan INFORMS TSL 2024 Research Challenge** dataset �
 - Download: [Meituan-INFORMS-TSL-Research-Challenge](https://github.com/meituan/Meituan-INFORMS-TSL-Research-Challenge)
 - Place the raw files in `data/raw/`
 - The pipeline filters to **district 3, days 6–7** (Oct 23–24) for evaluation — 5,779 orders, 95 couriers
-- Days 0–5 are used to train the HMM regime detector
+- Days 0–5 are used to train the Bayesian regime detector
 
 ---
 
@@ -88,7 +88,7 @@ This project uses the **Meituan INFORMS TSL 2024 Research Challenge** dataset �
 
 | Module | AI Topics |
 |---|---|
-| HMM Regime Detector | Hidden Markov Model, Bayesian Inference, Probabilistic Reasoning over Time |
+| Bayesian Regime Detector | Bayesian Inference, Probabilistic Reasoning over Time |
 | CSP + A* Assignment | Constraint Satisfaction, A* Search, Adversarial Search |
 | PPO Dispatcher | MDP, Reinforcement Learning, Sequential Decision Making |
 
@@ -138,7 +138,7 @@ python main.py --fast
 **Run a specific step only:**
 ```bash
 python main.py --step 0   # data preparation
-python main.py --step 1   # HMM regime detector
+python main.py --step 1   # Bayesian regime detector
 python main.py --step 2   # CSP + A* assignment
 python main.py --step 3   # PPO dispatcher
 python main.py --step 4   # results aggregation
@@ -153,7 +153,7 @@ data/raw/  →  prepare_meituan_data.py
                       ↓
               orders.csv, couriers.csv, observations.csv
                       ↓
-              hmm_regime_detector.py  →  hmm_beliefs.csv
+              bayesian_regime_detector.py  →  bayesian_beliefs.csv
                       ↓
               csp_assignment.py       →  csp_metrics.csv
                       ↓
