@@ -1,7 +1,7 @@
 module,metric,value
-HMM,regime_accuracy,0.4701
-HMM,mean_confidence_correct,0.7501
-HMM,mean_confidence_wrong,0.6295
+Bayesian,regime_accuracy,0.4701
+Bayesian,mean_confidence_correct,0.7501
+Bayesian,mean_confidence_wrong,0.6295
 CSP_astar_fixed,on_time_rate_regime0,0.9883
 CSP_astar_fixed,on_time_rate_regime1,0.7039
 CSP_astar_fixed,on_time_rate_regime2,0.951
