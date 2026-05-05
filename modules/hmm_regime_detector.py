@@ -5,7 +5,7 @@ Uses a Bayesian forward filter with hand-tuned emission parameters
 fitted to real Meituan order patterns.
 
 Inputs:
-  data/observations.csv      — per-minute order stream features
+  data/processed/observations.csv      — per-minute order stream features
 
 Outputs:
   results/hmm_beliefs.csv    — posterior P(regime | history) per timestep

@@ -20,7 +20,7 @@ Baselines:
   3. PPO with regime belief (your system)
 
 Inputs:
-  data/orders.csv, data/couriers.csv, results/hmm_beliefs.csv
+  data/processed/orders.csv, data/processed/couriers.csv, results/hmm_beliefs.csv
 
 Outputs:
   results/ppo_training_curves.csv

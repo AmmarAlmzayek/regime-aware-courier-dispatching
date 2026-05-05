@@ -23,8 +23,8 @@ Three Conditions Compared
 
 Inputs
 ------
-data/orders.csv         — produced by data/prepare_meituan.py
-data/couriers.csv       — produced by data/prepare_meituan.py
+data/processed/orders.csv         — produced by data/prepare_meituan.py
+data/processed/couriers.csv       — produced by data/prepare_meituan.py
 results/hmm_beliefs.csv — produced by Module 1 (HMM Forward Filter)
 
 Outputs
@@ -737,6 +737,6 @@ def run(orders_path="data/processed/orders.csv",
 
 
 if __name__ == "__main__":
-    if not os.path.exists("data/orders.csv"):
+    if not os.path.exists("data/processed/orders.csv"):
         os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     run()
