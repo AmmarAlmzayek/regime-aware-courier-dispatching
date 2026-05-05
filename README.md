@@ -77,7 +77,7 @@ regime-aware-courier-dispatching/
 
 This project uses the **Meituan INFORMS TSL 2024 Research Challenge** dataset — 654,343 real food delivery orders from a Chinese city between October 17–24, 2022.
 
-- Download: [GitHub — Meituan AutoML](https://github.com/Meituan-AutoML/INFORMS-TSL-2024-Challenge)
+- Download: [GitHub — Meituan AutoML](https://github.com/meituan/Meituan-INFORMS-TSL-Research-Challenge)
 - Place the raw files in `data/raw/`
 - The pipeline filters to **district 3, days 6–7** (Oct 23–24) for evaluation — 5,779 orders, 95 couriers
 - Days 0–5 are used to train the HMM regime detector
@@ -98,7 +98,7 @@ This project uses the **Meituan INFORMS TSL 2024 Research Challenge** dataset �
 
 **1. Clone the repo**
 ```bash
-git clone https://github.com/your-username/regime-aware-courier-dispatching.git
+git clone https://github.com/AmmarAlmzayek/regime-aware-courier-dispatching.git
 cd regime-aware-courier-dispatching
 ```
 
