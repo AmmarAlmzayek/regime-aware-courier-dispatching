@@ -619,8 +619,8 @@ def plot_performance(metrics_df, save_path):
 
 
 # ── Main entry point ─────────────────────────────────────────────────────────
-def run(orders_path="data/orders.csv",
-        couriers_path="data/couriers.csv",
+def run(orders_path="data/processed/orders.csv",
+        couriers_path="data/processed/couriers.csv",
         beliefs_path="results/hmm_beliefs.csv",
         results_dir="results", plots_dir="plots"):
     os.makedirs(results_dir, exist_ok=True)

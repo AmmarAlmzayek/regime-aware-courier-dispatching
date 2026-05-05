@@ -4,11 +4,11 @@ prepare_meituan_data.py
 Converts raw Meituan dataset files into the exact format
 expected by the project modules (HMM, CSP, PPO).
 
-Input files (put these in your data/ folder):
+Input files (put these in your data/raw/ folder):
   all_waybill_info_meituan_0322.csv    <- main orders file (unzipped)
   courier_wave_info_meituan.csv        <- courier waves file
 
-Output files (saved to data/ folder):
+Output files (saved to data/processed/ folder):
   orders.csv        -> used by PPO dispatcher (your module)
   couriers.csv      -> used by PPO dispatcher (your module)
   observations.csv  -> used by HMM regime detector (Person 1)
@@ -20,18 +20,17 @@ Usage:
 
 import pandas as pd
 import numpy as np
-from scipy.stats import entropy as scipy_entropy
 import os
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-RAW_WAYBILLS = "data/all_waybill_info_meituan_0322.csv"
-RAW_WAVES    = "data/courier_wave_info_meituan.csv"
+RAW_WAYBILLS = "data/raw/all_waybill_info_meituan_0322.csv"
+RAW_WAVES    = "data/raw/courier_wave_info_meituan.csv"
 
-OUT_ORDERS   = "data/orders.csv"
-OUT_COURIERS = "data/couriers.csv"
-OUT_OBS      = "data/observations.csv"
-OUT_TRUTH    = "data/regime_truth.csv"
+OUT_ORDERS   = "data/processed/orders.csv"
+OUT_COURIERS = "data/processed/couriers.csv"
+OUT_OBS      = "data/processed/observations.csv"
+OUT_TRUTH    = "data/processed/regime_truth.csv"
 
 # Map real dates to day numbers (0-7)
 DAY_MAP = {
@@ -340,7 +339,8 @@ def main():
 ╚══════════════════════════════════════════════════════╝
     """)
 
-    os.makedirs("data", exist_ok=True)
+    os.makedirs("data/raw", exist_ok=True)
+    os.makedirs("data/processed", exist_ok=True)
 
     # Check input files exist before starting
     missing = []

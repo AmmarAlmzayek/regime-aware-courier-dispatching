@@ -156,7 +156,7 @@ def plot_beliefs(beliefs, true_regimes, day, save_path):
 
 # ── Main pipeline ─────────────────────────────────────────────────────────────
 
-def run(obs_path="data/observations.csv",
+def run(obs_path="data/processed/observations.csv",
         results_dir="results",
         plots_dir="plots"):
 
