@@ -25,7 +25,7 @@ Inputs
 ------
 data/processed/orders.csv         — produced by data/prepare_meituan.py
 data/processed/couriers.csv       — produced by data/prepare_meituan.py
-results/hmm_beliefs.csv — produced by Module 1 (HMM Forward Filter)
+results/hmm_beliefs.csv           — produced by Module 1 (HMM Forward Filter)
 
 Outputs
 -------

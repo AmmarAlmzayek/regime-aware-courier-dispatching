@@ -1,32 +1,41 @@
 """
-Module 3 — Regime-Conditioned PPO Dispatcher (Person 3)
-=========================================================
+Module 3 — Regime-Conditioned PPO Dispatcher
+=================================================================
 Builds a Gymnasium-compatible dispatch environment and trains
 a PPO agent whose state includes the HMM regime belief vector.
+For each dispatch cycle, the agent assigns couriers to orders
+using a policy conditioned on the current demand regime.
 
-AI Topics Covered:
-  - Markov Decision Process (environment formulation)
-  - Reinforcement Learning (PPO policy gradient)
-  - Sequential Decision Making (incremental order assignment)
+AI Topics Covered
+-----------------
+- Markov Decision Process (environment formulation)
+- Reinforcement Learning (PPO policy gradient)
+- Sequential Decision Making (incremental order assignment)
 
-Key Novelty in State Space:
-  Standard state:  [courier_locs, pending_orders, time_of_day]
-  Your state adds: [p_quiet, p_lunch, p_afternoon, p_dinner,    ← regime belief
-                    time_in_regime, transition_prob]             ← regime dynamics
+Key Novelty
+-----------
+Standard state:  [courier_locs, pending_orders, time_of_day]
+Your state adds: [p_quiet, p_lunch, p_afternoon, p_dinner,
+                  time_in_regime, transition_prob]
 
-Baselines:
-  1. Greedy (nearest courier, ignore regime)
-  2. PPO without regime belief (standard state only)
-  3. PPO with regime belief (your system)
+Three Conditions Compared
+-------------------------
+1. Greedy baseline        — nearest courier, no regime awareness
+2. PPO without regime     — standard state only
+3. PPO with regime belief — full system (novel)
 
-Inputs:
-  data/processed/orders.csv, data/processed/couriers.csv, results/hmm_beliefs.csv
+Inputs
+------
+data/processed/orders.csv        — produced by data/prepare_meituan_data.py
+data/processed/couriers.csv      — produced by data/prepare_meituan_data.py
+results/hmm_beliefs.csv          — produced by Module 1
 
-Outputs:
-  results/ppo_training_curves.csv
-  results/ppo_evaluation.csv
-  plots/training_curves.png
-  plots/ppo_comparison.png
+Outputs
+-------
+results/ppo_training_curves.csv
+results/ppo_evaluation.csv
+plots/training_curves.png
+plots/ppo_comparison.png
 """
 
 import numpy as np

@@ -1,16 +1,26 @@
 """
 Module 1 — HMM Regime Detector
-==========================================
+=================================================================
 Uses a Bayesian forward filter with hand-tuned emission parameters
-fitted to real Meituan order patterns.
+fitted to real Meituan order patterns. For each minute of the test
+days, the filter maintains a probability distribution over the 4
+hidden demand regimes and updates it as new observations arrive.
 
-Inputs:
-  data/processed/observations.csv      — per-minute order stream features
+AI Topics Covered
+-----------------
+- Hidden Markov Model (Probabilistic Reasoning over Time)
+- Bayesian belief update (forward algorithm)
+- Probabilistic inference under uncertainty
 
-Outputs:
-  results/hmm_beliefs.csv    — posterior P(regime | history) per timestep
-  results/hmm_metrics.csv    — accuracy and confidence stats
-  plots/regime_beliefs_day{N}.png  — belief plot for first test day
+Inputs
+------
+data/processed/observations.csv  — produced by data/prepare_meituan_data.py
+
+Outputs
+-------
+results/hmm_beliefs.csv          — posterior P(regime | history) per timestep
+results/hmm_metrics.csv          — accuracy and confidence stats
+plots/regime_beliefs_day{N}.png  — belief plot for first test day
 """
 
 import pandas as pd
