@@ -63,13 +63,13 @@ class DispatchEnv(gym.Env):
     Dispatch environment where the agent assigns pending orders to couriers.
 
     State  (flat vector):
-      - Courier features:       N_COURIERS × 3  (zone, load, available)
-      - Order features:         MAX_ORDERS × 4  (zone, distance, tw_slack, urgency)
+      - Courier features:       N_COURIERS x 3  (zone, load, available)
+      - Order features:         MAX_ORDERS x 4  (zone, distance, tw_slack, urgency)
       - Time features:          3               (hour_sin, hour_cos, shift_progress)
       - Regime belief (novel):  4               (p_quiet, p_lunch, p_afternoon, p_dinner)
       - Regime dynamics (novel):2               (time_in_regime_norm, transition_prob)
 
-    Action: integer in [0, N_COURIERS × MAX_ORDERS)
+    Action: integer in [0, N_COURIERS x MAX_ORDERS)
       Decoded as: assign order[action // N_COURIERS] to courier[action % N_COURIERS]
       Action = N_COURIERS * MAX_ORDERS → "hold / postpone all"
 
@@ -149,7 +149,6 @@ class DispatchEnv(gym.Env):
 
         # Regime belief features (NOVEL ADDITION)
         if self.use_regime_belief:
-            active_regime = int(np.argmax(belief))
             time_in_regime = min(
                 (minute - self.regime_start_minute) / 60, 1.0)
             # transition prob: how much the top regime has changed
