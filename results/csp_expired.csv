@@ -1,0 +1,7 @@
+method,day,n_expired
+greedy,6,354
+greedy,7,263
+astar_fixed,6,348
+astar_fixed,7,262
+astar_regime,6,326
+astar_regime,7,242

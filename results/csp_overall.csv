@@ -1,0 +1,4 @@
+method,n_arrived,n_assigned,on_time_rate,on_time_rate_8b,throughput,success_rate,success_rate_8b
+greedy,5779,5151,0.7843,0.9717,0.8913,0.6991,0.8661
+astar_fixed,5779,5155,0.8547,0.9814,0.892,0.7624,0.8754
+astar_regime,5779,5196,0.8532,0.9811,0.8991,0.7671,0.8822
